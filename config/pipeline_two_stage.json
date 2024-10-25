@@ -1,0 +1,34 @@
+{
+    "jpeg_maxBatch": 8,
+    "jpeg_qsz": 64,
+    "dec_qsz": 64,
+    "ppyoloe_params": {
+        "resize_h": 640,
+        "resize_w": 640,
+        "pre_maxBatch": 32,
+        "pre_qsz": 10,
+        "infer_maxBatch": 32,
+        "infer_qsz": 32,
+        "custom_outputs": [
+            "num_detections",
+            "detection_boxes",
+            "detection_scores",
+            "detection_classes"
+        ],
+        "onnx_file": "../models/ppyoloe/ppyoloe_plus_crn_s_80e_coco_640x640_sim_cut_withnms.onnx",
+        "engine_file": "../models/ppyoloe/ppyoloe_plus_crn_s_80e_coco_640x640_sim_cut_withnms.engine"
+    },
+    "pplcnet_params": {
+        "resize_h": 224,
+        "resize_w": 224,
+        "pre_maxBatch": 8,
+        "pre_qsz": 64,
+        "infer_maxBatch": 64,
+        "infer_qsz": 0,
+        "custom_outputs": [
+            "softmax_1.tmp_0"
+        ],
+        "onnx_file": "../models/pplcnet/PPLCNet_x1_0_infer_sim_reshape.onnx",
+        "engine_file": "../models/pplcnet/PPLCNet_x1_0_infer_sim_reshape.engine"
+    }
+}

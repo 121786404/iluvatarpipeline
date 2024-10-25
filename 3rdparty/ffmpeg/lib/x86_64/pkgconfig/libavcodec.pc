@@ -1,0 +1,14 @@
+prefix=/home/feng.li/temp/ffmpeg_x86
+exec_prefix=${prefix}
+libdir=/home/feng.li/temp/ffmpeg_x86/lib
+includedir=/home/feng.li/temp/ffmpeg_x86/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 60.31.102
+Requires: libswresample >= 4.12.100, libavutil >= 58.29.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavcodec -pthread -lm -latomic -llzma -lz
+Libs.private: 
+Cflags: -I${includedir}

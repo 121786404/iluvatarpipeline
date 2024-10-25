@@ -1,0 +1,19 @@
+{
+    "jpeg_maxBatch": 8,
+    "jpeg_qsz": 64,
+    "dec_qsz": 64,
+    "yolov5s_params": {
+        "resize_h": 640,
+        "resize_w": 640,
+        "pre_maxBatch": 32,
+        "pre_qsz": 10,
+        "infer_maxBatch": 32,
+        "infer_qsz": 32,
+        "custom_outputs": [
+            "nms_output0",
+            "int_output1"
+        ],
+        "onnx_file": "../models/yolov5/yolov5s_sim_cut_withnms.engine",
+        "engine_file": "../models/yolov5/yolov5s_sim_cut_withnms.engine"
+    }
+}
