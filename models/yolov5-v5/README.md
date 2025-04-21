@@ -27,7 +27,7 @@ onnxsim ./best.onnx ./best_sim.onnx --overwrite-input-shape "images:-1,3,640,640
 3-1. 裁剪模型
 ```bash
 
-python3 cut_model.py  --input_model ./best_sim.onnx --output_model ./best_sim_cut.onnx --input_names "images" --output_names "/model.24/m.2/Conv_output_0" "/model.24/m.1/Conv_output_0" "/model.24/m.0/Conv_output_0"
+python3 cut_model.py  --input_model ./best_sim.onnx --output_model ./best_sim_cut.onnx --input_names "images" --output_names "/model.24/m.1/Conv_output_0" "/model.24/m.2/Conv_output_0"  "/model.24/m.0/Conv_output_0"
 
 ```
 
@@ -48,7 +48,7 @@ python3 cut_model.py  --input_model ./best_sim.onnx --output_model ./best_sim_cu
 
 ```bash
 
-python3  ./customize_op_for_model.py --input_model ./best_sim_cut.onnx --output_model ./best_sim_cut_withnms.onnx --fusion_names "/model.24/m.2/Conv_output_0" "/model.24/m.1/Conv_output_0" "/model.24/m.0/Conv_output_0" --include_nms
+python3  ./customize_op_for_model.py --input_model ./best_sim_cut.onnx --output_model ./best_sim_cut_withnms.onnx --fusion_names "/model.24/m.1/Conv_output_0" "/model.24/m.2/Conv_output_0"  "/model.24/m.0/Conv_output_0" --include_nms
 
 ```
 
