@@ -206,6 +206,7 @@ class FFmpegDemuxer
     bool is_mp4H264;
     bool is_mp4HEVC;
     bool is_VP9;
+    bool is_AVS2;
     bool is_EOF            = false;
     bool is_ConnectTimeout = false;
     bool addHeader         = false;
@@ -309,6 +310,7 @@ inline int FFmpeg2IxCodecId(AVCodecID id)
         case AV_CODEC_ID_H264: return 0;   // 0 STD_AVC
         case AV_CODEC_ID_HEVC: return 12;  // 12 STD_HEVC
         case AV_CODEC_ID_VP9: return 13;   // 13 STD_VP9
+        case AV_CODEC_ID_AVS2: return 14;   // 14 STD_AVS2
         default: return 17;                // 17
     }
 }

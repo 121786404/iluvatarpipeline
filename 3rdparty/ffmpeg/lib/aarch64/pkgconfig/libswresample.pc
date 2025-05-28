@@ -1,12 +1,12 @@
-prefix=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg
+prefix=/home/feng.li/Codec/build/ffmpeg
 exec_prefix=${prefix}
-libdir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/lib
-includedir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/include
+libdir=/home/feng.li/Codec/build/ffmpeg/lib
+includedir=/home/feng.li/Codec/build/ffmpeg/include
 
 Name: libswresample
 Description: FFmpeg audio resampling library
-Version: 4.12.100
-Requires: libavutil >= 58.29.100
+Version: 4.13.100
+Requires: libavutil >= 58.30.100
 Requires.private: 
 Conflicts:
 Libs: -L${libdir}  -lswresample -lm -latomic

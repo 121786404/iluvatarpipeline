@@ -1,11 +1,11 @@
-prefix=/home/feng.li/temp/ffmpeg_x86
+prefix=/home/feng.li/code/Codec/output
 exec_prefix=${prefix}
-libdir=/home/feng.li/temp/ffmpeg_x86/lib
-includedir=/home/feng.li/temp/ffmpeg_x86/include
+libdir=/home/feng.li/code/Codec/output/lib
+includedir=/home/feng.li/code/Codec/output/include
 
 Name: libavutil
 Description: FFmpeg utility library
-Version: 58.29.100
+Version: 58.30.100
 Requires: 
 Requires.private: 
 Conflicts:

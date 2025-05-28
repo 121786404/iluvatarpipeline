@@ -518,8 +518,8 @@ IluvatarJpegCodec::IluvatarJpegCodec(int dev, int maxBatch, bool decoder_enable,
         checkCudaErrors(nvjpegJpegStateCreate(p_impl->nvjpeg_handle, &(p_impl->jpeg_state_dec)));
 
     if (encoder_enable)
-    {
-        p_impl->maxBatchBuffer = 1920 * 1088 * 3 / 2 * sizeof(uint8_t) * maxBatch;
+    {   //3840×2160
+        p_impl->maxBatchBuffer = 3840 * 2160 * 3 / 2 * sizeof(uint8_t) * maxBatch;
         checkCudaErrors(cudaMalloc((void**)&(p_impl->BatchYuvBuff), p_impl->maxBatchBuffer));
 
         // checkCudaErrors(nvjpegJpegStateCreate(p_impl->nvjpeg_handle, &(p_impl->jpeg_state_enc)));

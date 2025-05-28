@@ -1,14 +1,14 @@
-prefix=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg
+prefix=/home/feng.li/Codec/build/ffmpeg
 exec_prefix=${prefix}
-libdir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/lib
-includedir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/include
+libdir=/home/feng.li/Codec/build/ffmpeg/lib
+includedir=/home/feng.li/Codec/build/ffmpeg/include
 
 Name: libavcodec
 Description: FFmpeg codec library
-Version: 60.31.102
-Requires: libswresample >= 4.12.100, libavutil >= 58.29.100
+Version: 60.32.100
+Requires: libswresample >= 4.13.100, libavutil >= 58.30.100
 Requires.private: 
 Conflicts:
-Libs: -L${libdir}  -lavcodec -pthread -lm -latomic -llzma -lz
+Libs: -L${libdir}  -lavcodec -pthread -lm -latomic -L/home/feng.li/Codec/build/uavs3d/lib -luavs3d -lm -lpthread -lz
 Libs.private: 
 Cflags: -I${includedir}

@@ -862,6 +862,7 @@ FFmpegDemuxer::FFmpegDemuxer(AVFormatContext* fmtcx)
     is_mp4H264 = (eVideoCodec == AV_CODEC_ID_H264);
     is_mp4HEVC = (eVideoCodec == AV_CODEC_ID_HEVC);
     is_VP9     = (eVideoCodec == AV_CODEC_ID_VP9);
+    is_AVS2     = (eVideoCodec == AV_CODEC_ID_AVS2);
     av_init_packet(&pktSrc);
     pktSrc.data = nullptr;
     pktSrc.size = 0;
@@ -875,7 +876,8 @@ FFmpegDemuxer::FFmpegDemuxer(AVFormatContext* fmtcx)
     // Initialize Annex.B BSF;
     const string bfs_name = is_mp4H264   ? "h264_mp4toannexb"
                             : is_mp4HEVC ? "hevc_mp4toannexb"
-                            : is_VP9     ? string()
+                            : is_VP9 || is_AVS2  
+                                    ? string()
                                          : "unknown";
 
     if (!bfs_name.empty())

@@ -1,12 +1,12 @@
-prefix=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg
+prefix=/home/feng.li/Codec/build/ffmpeg
 exec_prefix=${prefix}
-libdir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/lib
-includedir=/home/corex/feng.li/iluvatarpipeline/3rdparty/ffmpeg/include
+libdir=/home/feng.li/Codec/build/ffmpeg/lib
+includedir=/home/feng.li/Codec/build/ffmpeg/include
 
 Name: libswscale
 Description: FFmpeg image rescaling library
-Version: 7.5.100
-Requires: libavutil >= 58.29.100
+Version: 7.6.100
+Requires: libavutil >= 58.30.100
 Requires.private: 
 Conflicts:
 Libs: -L${libdir}  -lswscale -lm -latomic
