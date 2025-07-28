@@ -1,4 +1,10 @@
 # ONNX2IXRT
+0. 安装ixrt python 和 cuda_python
+```bash
+pip install ../../3rdparty/ixrt/ixrt-0.9.1+corex.4.1.2.20240906.161-cp38-cp38-linux_aarch64.whl -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/ 
+pip install cuda_python-11.8.0+corex.4.1.2.20240906.161-cp38-cp38-linux_aarch64.whl -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/ 
+```
+
 1. download models 
 
 ```bash
@@ -15,16 +21,16 @@ onnxsim ./yolov5s.onnx ./yolov5s_sim.onnx --overwrite-input-shape "images:-1,3,6
 
 3. 裁剪和填加ixrt-nms算子
 
-3-1. 裁剪模型
+3-1. 裁剪模型, 4.3.0之后版本主要修改:cut位置前提至最后一个Conv结束，-1x512x20x20,-1x512x40x40,-1x512x80x80,
 ```bash
 python3 cut_model.py \
         --input_model ./yolov5s_sim.onnx \
         --output_model ./yolov5s_sim_cut.onnx  \
         --input_names "images" \
-        --output_names "474" "622" "326"
+        --output_names "326" "474" "622"
 ```
 
-3-2. 填加ixrt-nms算子
+3-2. 填加ixrt-nms算子, 4.3.0之后版本主要修改:nms plugin名字修改，由原来的`NMS`替换为`DetectionNMS_IxRT`
 
 请注意将 AddYoloDecoderOp时需要确认anchor与相应的大小的层对应
 例如cut后的三个结果中，大小为 ?x255x80x80 -> 对应的anchor参数如下
@@ -43,7 +49,7 @@ python3 cut_model.py \
 python3 ./customize_op_for_model.py \
         --input_model ./yolov5s_sim_cut.onnx \
         --output_model ./yolov5s_sim_cut_withnms.onnx  \
-        --fusion_names "474" "622" "326" \
+        --fusion_names "622" "474" "326" \
         --include_nms
 ```
 

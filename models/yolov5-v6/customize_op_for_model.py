@@ -31,7 +31,7 @@ class YoloV5Transform:
 
     def AddGPUNms(self, inputs: list, outputs, **attributes):
         self.t.make_operator(
-            "NMS", inputs=inputs, outputs=outputs, **attributes
+            "DetectionNMS_IxRT", inputs=inputs, outputs=outputs, **attributes
         )
 
         for dest, src in zip(outputs, inputs):
@@ -42,18 +42,18 @@ def customize_ops(graph, fusion_names, include_nms=True):
     t = YoloV5Transform(graph)
     graph = t.AddYoloDecoderOp(
         inputs=[fusion_names[0]],
-        outputs=["decoder_16"],
-        anchor=[30, 61, 62, 45, 59, 119],
-        num_class=80,
-        stride=16,
-        faster_impl = 1,
-    )
-    graph = t.AddYoloDecoderOp(
-        inputs=[fusion_names[1]],
         outputs=["decoder_32"],
         anchor=[116, 90, 156, 198, 373, 326],
         num_class=80,
         stride=32,
+        faster_impl = 1,
+    )
+    graph = t.AddYoloDecoderOp(
+        inputs=[fusion_names[1]],
+        outputs=["decoder_16"],
+        anchor=[30, 61, 62, 45, 59, 119],
+        num_class=80,
+        stride=16,
         faster_impl = 1,
     )
     graph = t.AddYoloDecoderOp(

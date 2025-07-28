@@ -50,6 +50,8 @@ Trt::Trt(std::string plugin_lib_path)
         assert(plugin_handle != nullptr && "Invaid plugin lib path ");
     }
 
+    initLibNvInferPlugins(&mLogger, "");
+
     mBuilder = nvinfer1::createInferBuilder(mLogger);
     mConfig  = mBuilder->createBuilderConfig();
     mProfile = mBuilder->createOptimizationProfile();
@@ -81,6 +83,11 @@ Trt::~Trt()
     {
         delete mBuilder;
         mBuilder = nullptr;
+    }
+    if (mRuntime != nullptr)
+    {
+        delete mRuntime;
+        mRuntime = nullptr;
     }
     if (mNetwork != nullptr)
     {
@@ -211,19 +218,18 @@ int Trt::GetNbOutputBindings() const
 
 bool Trt::DeserializeEngine(const std::string& engineFile)
 {
-    std::ifstream in(engineFile.c_str(), std::ifstream::binary);
-    if (in.is_open())
+    std::ifstream input(engineFile, std::ios::ate | std::ios::binary);
+    std::vector<char> buffer;
+    if (input.is_open())
     {
         logger->info("[{} {}]: deserialize engine from {}", __FUNCTION__, __LINE__, engineFile);
-        auto const start_pos = in.tellg();
-        in.ignore(std::numeric_limits<std::streamsize>::max());
-        size_t bufCount = in.gcount();
-        in.seekg(start_pos);
-        std::unique_ptr<char[]> engineBuf(new char[bufCount]);
-        in.read(engineBuf.get(), bufCount);
-        initLibNvInferPlugins(&mLogger, "");
+        std::streamsize size = input.tellg();
+        input.seekg(0, std::ios::beg);
+        buffer.resize(size);
+        std::vector<char> *raw_plan = &buffer;
+        input.read(raw_plan->data(), size);
         mRuntime = nvinfer1::createInferRuntime(mLogger);
-        mEngine  = mRuntime->deserializeCudaEngine((void*)engineBuf.get(), bufCount);
+        mEngine  = mRuntime->deserializeCudaEngine(raw_plan->data(), raw_plan->size());
         assert(mEngine != nullptr);
         if (mIsDynamicShape)
         {
@@ -272,7 +278,6 @@ void Trt::BuildEngine(const std::string& fileName)
         logger->info("[{} {}]: BuilderFlag: kINT8", __FUNCTION__, __LINE__);
     }
     cout << "build engine..." << endl;
-    initLibNvInferPlugins(&mLogger, "");
     mRuntime = nvinfer1::createInferRuntime(mLogger);
     unique_ptr<nvinfer1::IHostMemory> data{mBuilder->buildSerializedNetwork(*mNetwork, *mConfig)};
     if (not data)

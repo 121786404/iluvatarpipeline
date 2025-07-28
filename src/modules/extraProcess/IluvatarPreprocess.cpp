@@ -80,7 +80,7 @@ static bool CropResizeYuv420P(std::vector<T>&                 srcImages,
     uint8_t* d_dst = reinterpret_cast<uint8_t*>(dstImage.GetGpuMem());
 
     std::ostringstream oss;
-    oss << "d_src:" << d_src << ", d_dst:" << d_dst << ", d_srcShape:" << d_srcShape << ", d_rect:" << d_rect;
+    oss << "d_src:" << d_src <<", d_dst:" << static_cast<void*>(d_dst) << ", d_srcShape:" << static_cast<void*>(d_srcShape) << ", d_rect:" << static_cast<void*>(d_rect);
     std::vector<uint8_t*> d_src_vec(numberOfImages, nullptr);
     std::vector<int2>     h_srcShape(numberOfImages);
     for (size_t i = 0; i < numberOfImages; i++)

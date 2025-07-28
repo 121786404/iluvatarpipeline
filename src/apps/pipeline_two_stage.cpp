@@ -400,7 +400,7 @@ int PPLCNetModelProcessor::InitIxrtIfner()
     }
 
     _m_infer_model->AddDynamicShapeProfile(
-        "x", {1, 3, 256, 192}, {opt_batch, 3, 256, 192}, {static_cast<int>(_m_infer_maxBatch), 3, 256, 192});
+        "x", {1, 3, _m_resize_h, _m_resize_w}, {opt_batch, 3, _m_resize_h, _m_resize_w}, {static_cast<int>(_m_infer_maxBatch), 3, _m_resize_h, _m_resize_w});
     _m_infer_model->CreateEngine(_m_onnx_file, _m_engine_file, _m_model_outputs, 1);
 
     _m_model_height = _m_infer_model->GetBindingDimsVec(0)[2];
