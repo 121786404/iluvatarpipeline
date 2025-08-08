@@ -507,7 +507,7 @@ IluvatarJpegCodec::IluvatarJpegCodec(int dev, int maxBatch, bool decoder_enable,
                  props.minor,
                  props.ECCEnabled ? "on" : "off");
 
-    checkCudaErrors(cudaSetDevice(dev));
+    // checkCudaErrors(cudaSetDevice(dev));
     checkCudaErrors(cuCtxGetCurrent(&(p_impl->m_cuContext)));
     checkCudaErrors(cudaStreamCreate(&(p_impl->m_cudaStream)));
 

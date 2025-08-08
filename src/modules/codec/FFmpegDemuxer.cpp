@@ -120,59 +120,81 @@ static inline int _opencv_ffmpeg_interrupt_callback(void* ptr)
 
 static inline int check_i_frame(char *data, int size, AVCodecID bitFormat)
 {
-    unsigned int pos              = 0;
-    unsigned int k                = 0;
-    unsigned int nalUnitType      = 0;
-    bool         bStartCode       = false;      
-    char *scData            = data;
+    if ((size <= 4) || (data == NULL))
+        return -1;
 
-    if((bitFormat != AV_CODEC_ID_H264) && (bitFormat != AV_CODEC_ID_HEVC))
+    if (bitFormat == AV_CODEC_ID_AVS2)
     {
-        return 0;
+        size_t pos = 0;
+        const uint8_t *u8data = (const uint8_t *)data;
+        while (pos + 3 < (size_t)size) {
+            // 0x000001 或 0x0000??（第三字节 >= 0xB0）可能缺少0x01的容错处理
+            if ((u8data[pos] == 0x00 && u8data[pos+1] == 0x00 &&
+                (u8data[pos+2] == 0x01 || (u8data[pos+2] >= 0xB0 && u8data[pos+2] <= 0xB6)))) {
+
+                size_t nal_start;
+                if (u8data[pos+2] == 0x01)
+                    nal_start = pos + 3;
+                else
+                    nal_start = pos + 2;
+
+                uint8_t nal_type = u8data[nal_start];
+
+                if (nal_type == 0xB0)
+                    return 1;   // Sequence header，等价你之前的 ifType == 1
+                if (nal_type == 0xB3)
+                    return 2;   // I帧，等价 ifType == 2
+                if (nal_type == 0xB6)
+                    return 0;   // 非关键帧
+            }
+            pos++;
+        }
+        return -1; // 找不到关键帧 start code
     }
 
-    if((size <= 4) || (scData == NULL))
-       return -1;
+    // H264/HEVC 原有逻辑
+    unsigned int pos = 0;
+    unsigned int k = 0;
+    unsigned int nalUnitType = 0;
+    bool bStartCode = false;
+    char *scData = data;
 
-    while(k < (size - 4))
+    while (k < (size - 4))
     {
-        if ((0==scData[k]) && (0==scData[k+1]) && (1==scData[k+2]))
+        if ((0 == scData[k]) && (0 == scData[k+1]) && (1 == scData[k+2]))
         {
             pos = k + 3;
             bStartCode = true;
         }
-        else if ((0==scData[k]) && (0==scData[k+1]) && (0==scData[k+2]) && (1 == scData[k+3]))
+        else if ((0 == scData[k]) && (0 == scData[k+1]) && (0 == scData[k+2]) && (1 == scData[k+3]))
         {
             pos = k + 4;
             bStartCode = true;
         }
 
-        if(bStartCode == true)
+        if (bStartCode)
         {
-            if(bitFormat == (int)AV_CODEC_ID_H264)
+            bStartCode = false;
+            if (bitFormat == AV_CODEC_ID_H264)
             {
                 nalUnitType = scData[pos] & 0x1f;
-                if((nalUnitType == 0x5) || (nalUnitType == 0x7))
-                {
+                if ((nalUnitType == 0x5) || (nalUnitType == 0x7))
                     return nalUnitType;
-                }
             }
-            else if(bitFormat == (int)AV_CODEC_ID_HEVC)
+            else if (bitFormat == AV_CODEC_ID_HEVC)
             {
                 nalUnitType = (scData[pos] & 0x7E) >> 1;
-                if(((nalUnitType >= 0x10) && (nalUnitType <= 0x15)) || (nalUnitType == 0x20))
-                {
+                if (((nalUnitType >= 0x10) && (nalUnitType <= 0x15)) || (nalUnitType == 0x20))
                     return nalUnitType;
-                }
             }
         }
-
         k++;
         usleep(1);
-    }   
+    }
 
     return -1;
 }
+
 
 
 DataProvider::DataProvider(std::istream& istr)
@@ -271,6 +293,7 @@ AVColorRange FFmpegDemuxer::GetColorRange() const
 
 extern unsigned long GetNumDecodeSurfaces(cudaVideoCodec eCodec, unsigned int nWidth, unsigned int nHeight);
 
+
 bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
                           size_t&     rVideoBytes,
                           PacketData& pktData,
@@ -351,6 +374,7 @@ bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
             // extraction at all;
             if (!bsfc_sei)
             {
+                
                 // SEI has NAL type 6 for H.264 and NAL type 39 & 40 for H.265;
                 const string sei_filter = is_mp4H264   ? "filter_units=pass_types=6"
                                           : is_mp4HEVC ? "filter_units=pass_types=39-40"
@@ -420,46 +444,63 @@ bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
     //   return false;
     // }
 
-    const bool bsf_needed = is_mp4H264 || is_mp4HEVC;
+    const bool bsf_needed = is_mp4H264 || is_mp4HEVC || is_AVS2;
     appendBytes(annexbBytes, pktSrc, pktDst, bsfc_annexb, videoStream, bsf_needed);
 
     if (gotVideo)
     {
         if (!addHeader)
         {
-            if (!is_rtsp) //not rtsp
-                ifType = 0;   //do not check I frame
-            else
+
+            
+
+            if (!is_rtsp)
+                ifType = 0;
+            else {
                 ifType = check_i_frame((char *)annexbBytes.data(), annexbBytes.size(), eVideoCodec);
+            }
 
-            if(ifType >= 0)
+            if (ifType >= 0)
             {
-                if ((ifType == 0x5) || ((ifType >= 0x10) && (ifType <= 0x15))) //no vps,sps
-                {
-                    vector<uint8_t> extradata;
-                    int             extradata_size = bsfc_annexb->par_in->extradata_size;
-                    extradata.resize(extradata_size);
-                    memcpy(extradata.data(), bsfc_annexb->par_in->extradata, extradata_size);
-
-                    annexbBytes.insert(annexbBytes.begin(), extradata.begin(), extradata.end());
-                }
-                else if((ifType == 0x7) || (ifType == 0x20) || (ifType == 0))
-                {
-                    ;
-                }
-                else
-                {
-                    cerr << "Failed to read Header frame: ifType" << ifType << endl;
-                    return false;
+                if (!is_AVS2) {
+                    // 原有 H264/H265 判断
+                    if ((ifType == 0x5) || ((ifType >= 0x10) && (ifType <= 0x15)))
+                    {
+                        vector<uint8_t> extradata;
+                        int extradata_size = bsfc_annexb->par_in->extradata_size;
+                        extradata.resize(extradata_size);
+                        memcpy(extradata.data(), bsfc_annexb->par_in->extradata, extradata_size);
+                        annexbBytes.insert(annexbBytes.begin(), extradata.begin(), extradata.end());
+                    }
+                    else if ((ifType == 0x7) || (ifType == 0x20) || (ifType == 0))
+                    {
+                        ;
+                    }
+                    else
+                    {
+                        cerr << "Failed to read Header frame: ifType=" << ifType << endl;
+                        return false;
+                    }
+                } else {
+                    // AVS2 情况：只要是 sequence header (0xB0) + I 帧 (0xB3) 就通过
+                    if (ifType == 1 || ifType == 2) {
+                        // 如果是 seq header，可以缓存起来，和 I 帧一起送
+                        // 这里可根据需求实现缓存逻辑
+                    } else {
+                        // cerr << "Failed to read AVS2 header frame: ifType=" << ifType << endl;
+                        return false;
+                    }
                 }
                 addHeader = true;
             }
             else
             {
-                cerr << "Failed to read Header frame: ifType" << ifType << endl;
+                cerr << "Failed to read Header frame: ifType=" << ifType << endl;
                 return false;
             }
         }
+
+
     }
 
     pVideo      = annexbBytes.data();
@@ -700,7 +741,7 @@ FFmpegDemuxer::~FFmpegDemuxer()
         av_bsf_free(&bsfc_annexb);
     }
 
-    if (bsfc_annexb)
+    if (bsfc_sei)
     {
         av_bsf_free(&bsfc_sei);
     }
@@ -794,6 +835,7 @@ AVFormatContext* FFmpegDemuxer::CreateFormatContext(const char* szFilePath, cons
 
     AVFormatContext* ctx = nullptr;
     // av_register_all();
+
     auto err = avformat_open_input(&ctx, szFilePath, nullptr, &options);
     if (err < 0 || nullptr == ctx)
     {
@@ -875,10 +917,11 @@ FFmpegDemuxer::FFmpegDemuxer(AVFormatContext* fmtcx)
 
     // Initialize Annex.B BSF;
     const string bfs_name = is_mp4H264   ? "h264_mp4toannexb"
-                            : is_mp4HEVC ? "hevc_mp4toannexb"
-                            : is_VP9 || is_AVS2  
-                                    ? string()
-                                         : "unknown";
+                        : is_mp4HEVC ? "hevc_mp4toannexb"
+                        : is_AVS2    ? "dump_extra"
+                        : is_VP9     ? string()
+                                     : "unknown";
+
 
     if (!bfs_name.empty())
     {

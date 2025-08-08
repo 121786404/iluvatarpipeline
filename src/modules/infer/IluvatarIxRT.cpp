@@ -236,7 +236,6 @@ bool Trt::DeserializeEngine(const std::string& engineFile)
             assert(mProfile->isValid() && "Invalid dynamic shape profile");
             mConfig->addOptimizationProfile(mProfile);
         }
-        delete mRuntime;
         return true;
     }
     return false;
