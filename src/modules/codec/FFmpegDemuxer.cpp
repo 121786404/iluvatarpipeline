@@ -128,7 +128,6 @@ static inline int check_i_frame(char *data, int size, AVCodecID bitFormat)
         size_t pos = 0;
         const uint8_t *u8data = (const uint8_t *)data;
         while (pos + 3 < (size_t)size) {
-            // 0x000001 或 0x0000??（第三字节 >= 0xB0）可能缺少0x01的容错处理
             if ((u8data[pos] == 0x00 && u8data[pos+1] == 0x00 &&
                 (u8data[pos+2] == 0x01 || (u8data[pos+2] >= 0xB0 && u8data[pos+2] <= 0xB6)))) {
 
@@ -141,18 +140,17 @@ static inline int check_i_frame(char *data, int size, AVCodecID bitFormat)
                 uint8_t nal_type = u8data[nal_start];
 
                 if (nal_type == 0xB0)
-                    return 1;   // Sequence header，等价你之前的 ifType == 1
+                    return 1;  
                 if (nal_type == 0xB3)
-                    return 2;   // I帧，等价 ifType == 2
+                    return 2;   
                 if (nal_type == 0xB6)
-                    return 0;   // 非关键帧
+                    return 0;   
             }
             pos++;
         }
-        return -1; // 找不到关键帧 start code
+        return -1; 
     }
 
-    // H264/HEVC 原有逻辑
     unsigned int pos = 0;
     unsigned int k = 0;
     unsigned int nalUnitType = 0;
@@ -451,9 +449,6 @@ bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
     {
         if (!addHeader)
         {
-
-            
-
             if (!is_rtsp)
                 ifType = 0;
             else {
@@ -463,7 +458,6 @@ bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
             if (ifType >= 0)
             {
                 if (!is_AVS2) {
-                    // 原有 H264/H265 判断
                     if ((ifType == 0x5) || ((ifType >= 0x10) && (ifType <= 0x15)))
                     {
                         vector<uint8_t> extradata;
@@ -482,10 +476,8 @@ bool FFmpegDemuxer::Demux(uint8_t*&   pVideo,
                         return false;
                     }
                 } else {
-                    // AVS2 情况：只要是 sequence header (0xB0) + I 帧 (0xB3) 就通过
                     if (ifType == 1 || ifType == 2) {
-                        // 如果是 seq header，可以缓存起来，和 I 帧一起送
-                        // 这里可根据需求实现缓存逻辑
+                        
                     } else {
                         // cerr << "Failed to read AVS2 header frame: ifType=" << ifType << endl;
                         return false;
