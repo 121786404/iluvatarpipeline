@@ -31,7 +31,7 @@ class YoloV5Transform:
 
     def AddGPUNms(self, inputs: list, outputs, **attributes):
         self.t.make_operator(
-            "NMS", inputs=inputs, outputs=outputs, **attributes
+            "DetectionNMS_IxRT", inputs=inputs, outputs=outputs, **attributes
         )
 
         for dest, src in zip(outputs, inputs):
