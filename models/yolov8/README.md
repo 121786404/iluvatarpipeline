@@ -5,6 +5,8 @@ yolov8官方源码路径：`https://github.com/Pertical/YOLOv8/tree/main`
 ```bash
 git clone https://github.com/Pertical/YOLOv8.git
 ```
+# 镜像
+corex:4.3.6.release.20250718
 
 # Onnx2Ixrt
 
