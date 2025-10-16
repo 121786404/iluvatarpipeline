@@ -1,12 +1,24 @@
 # yolov8m模型
 ## 下载模型
 
-yolov8官方源码路径：`https://github.com/Pertical/YOLOv8/tree/main`
 ```bash
-git clone https://github.com/Pertical/YOLOv8.git
+git clone https://github.com/ultralytics/ultralytics.git
 ```
-# 镜像
-corex:4.3.6.release.20250718
+# Onnx下载
+```bash
+from ultralytics import YOLO
+
+# Load a YOLOv8 model (e.g., yolov8m.pt)
+model = YOLO("yolov8m.pt")
+
+# Export the model to ONNX format
+# opset=12 is recommended for compatibility
+# simplify=True optimizes the model graph
+# dynamic=False ensures fixed input size, often better for C++ deployment
+# imgsz=640 sets the input image size
+model.export(format="onnx", opset=16, dynamic=True, imgsz=640)
+print("Model exported successfully to yolov8m.onnx")
+```
 
 # Onnx2Ixrt
 
