@@ -14,17 +14,8 @@
    ```bash
    cd iluvatarpipeline
 
-   # 更新ixRT
-   cp 3rdparty/ixrt/include/* /usr/local/corex/include/
-   cp 3rdparty/ixrt/lib/aarch64/*  /usr/local/corex/lib64/
-   #cp 3rdparty/ixrt/lib/x86_64/*  /usr/local/corex/lib64/
-
-   # 安装opencv
-   # centos
-   yum install mesa-libGL -
-   
    # ubuntu
-   apt-get install -y libsm6 libxext6 libgl1 libopencv-dev
+   apt install libspdlog-dev nlohmann-json3-dev libfmt-dev
 
    # 编译	
    mkdir build 
