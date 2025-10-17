@@ -1,4 +1,4 @@
-# yolov8m模型
+# yolov11m模型
 ## 下载模型
 
 ```bash
