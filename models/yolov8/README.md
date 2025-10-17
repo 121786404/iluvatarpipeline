@@ -27,7 +27,7 @@ print("Model exported successfully to yolov8m.onnx")
 需要安装onnxsim
 ```bash
 pip install onnxsim
-onnxsim ./yolov8m.onnx ./yolov8m_sim.onnx --overwrite-input-shape "image:-1,3,640,640"
+onnxsim ./yolov8m.onnx ./yolov8m_sim.onnx --overwrite-input-shape "images:-1,3,640,640"
 ```
 
 ## 添加xywh2xyxy和填加ixrt-nms算子
@@ -55,9 +55,9 @@ python3 ./customize_op_for_model.py \
 ```bash
 ixrtexec --onnx ./yolov8m_sim_xyxy_withnms.onnx \
         --precision fp16 \
-        --min_shape image:1x3x640x640 \
-        --opt_shape image:16x3x640x640 \
-        --max_shape image:32x3x640x640 \
+        --min_shape images:1x3x640x640 \
+        --opt_shape images:16x3x640x640 \
+        --max_shape images:32x3x640x640 \
         --plugins /usr/local/corex/lib/liboss_ixrt_plugin.so \
         --save_engine ./yolov8m_sim_xyxy_withnms.engine 
 ```
